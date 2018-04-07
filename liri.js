@@ -21,7 +21,7 @@ function appendLogTxt(record) {
       return console.error(err);
     }
   })
-}
+};
 
 var commands = {
   'my-tweets': function () {
