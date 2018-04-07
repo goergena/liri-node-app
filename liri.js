@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-var keys = require('keys.js');
+var keys = require('./keys.js');
 
 var Spotify = require('node-spotify-api');
 var spotify = new Spotify(keys.spotify);
@@ -12,21 +12,18 @@ var request = require('request');
 
 var fs = require('fs');
 
-//GOALS 1 do omdb api request 
-//2 format the request
-//3 comment out all the shit that would fuck up the app
-//4 run a test for that movie
-//5 run a test for no movie
-//6 set up the twitter function
-//7 test that
+//GOALS 1 do omdb api request CHECK
+//2 format the request CHECK
+//3 comment out all the shit that would fuck up the app SORTA ITS FINE
+//4 run a test for that movie CHECK
+//5 run a test for no movie CHECK
+//6 set up the twitter function CHECK
+//7 test that CHECK
 //8 set up the read function for do what it says
 //9 spotify.
 
 /*
 
-`node liri.js my-tweets`
-
-   * This will show your last 20 tweets and when they were created at in your terminal/bash window.
 
 2. `node liri.js spotify-this-song '<song name here>'`
 
@@ -45,26 +42,8 @@ var fs = require('fs');
    * 
    * `node liri.js movie-this '<movie name here>'`
 
-   * This will output the following information to your terminal/bash window:
-
-     ```
-       * Title of the movie.
-       * Year the movie came out.
-       * IMDB Rating of the movie.
        * Rotten Tomatoes Rating of the movie.
-       * Country where the movie was produced.
-       * Language of the movie.
-       * Plot of the movie.
-       * Actors in the movie.
-     ```
 
-   * If the user doesn't type a movie in, the program will output data for the movie 'Mr. Nobody.'
-     
-     * If you haven't watched "Mr. Nobody," then you should: <http://www.imdb.com/title/tt0485947/>
-     
-     * It's on Netflix!
-   
-   * You'll use the request package to retrieve data from the OMDB API. Like all of the in-class activities, the OMDB API requires an API key. You may use `trilogy`.
 
 4. `node liri.js do-what-it-says`
    
@@ -75,17 +54,18 @@ var fs = require('fs');
      * Feel free to change the text in that document to test out the feature for other commands.
 
 ### BONUS
-
 * In addition to logging the data to your terminal/bash window, output the data to a .txt file called `log.txt`.
-
 * Make sure you append each command you run to the `log.txt` file. 
-
 * Do not overwrite your file each time you run a command.
 
 - - -
 */
-var songInput = 'the sign';
-var movieInput = 'mr. nobody';
+
+//spotify doesnt work
+
+
+var songDefault = 'the sign ace of base';
+var movieDefault = 'mr nobody';
 
 var commands = {
   'my-tweets': function () {
@@ -93,33 +73,58 @@ var commands = {
       if (err) {
         return console.error(err);
       }
+      var params = {
+        screen_name: 'sparklekingdom3'
+      };
+      client.get('statuses/user_timeline', params, function (error, tweets, response) {
+        if (!error) {
+          for (twIndex = 0; twIndex < tweets.length; twIndex++) {
+            var tweetTime = tweets[twIndex].created_at.split('+');
+            console.log(tweetTime[0] + " " + tweets[twIndex].text);
+          }
+        }
+      });
 
       console.log('this is supposed to be a list of your tweets ' + 'and their times');
     });
   },
 
   'spotify-this-song': function (songInput) {
-    if (!isNaN(songInput)) {
-      return console.log('Invalid value entered');
+    if (!songInput) {
+      songInput = songDefault;
     }
 
     spotify.search({
       type: 'track',
-      query: songInput
+      query: songInput,
+      limit: 1
     }, function (err, data) {
       if (err) {
         return console.error(err);
       }
 
-      console.log('spotify data: ' + data);
+      console.log('Link for preview: ' + JSON.stringify(data.tracks.items[0].preview_url) +
+        "\nTrack Name: " + JSON.stringify(data.tracks.items[0].name, null, 2) + ' Album: ' +
+        JSON.stringify(data.tracks.items[0].album.name, null, 2) + '\nArtists: ');
+      //JSON.stringify(data.tracks.items[0].artists[0].name)
+      data.tracks.items[0].artists.forEach(function (artist) {
+        console.log(" " + JSON.stringify(artist.name));
+      });
+
     });
+
 
     //need to append to log.txt
 
-    console.log('this should be spotify');
+    console.log('SPOTIFY TEST 138am');
   },
 
   'movie-this': function (movieInput) {
+    if (movieInput === undefined) {
+      movieInput = movieDefault;
+      console.log("this is the default call")
+
+    }
     if (!isNaN(movieInput)) {
       return console.log('Invalid value entered');
     }
@@ -132,12 +137,11 @@ var commands = {
         var movie = JSON.parse(body);
 
 
-        console.log("Title: " + movie.Title + ", Year: " + movie.Year + "\n IMDB Rating: " + movie.imdbRating + " \nCountry: " + movie.Country +
-          ", Language:" + movie.Language + "\nPlot: " + movie.Plot + "\nActors: " + movie.Actors);
+        console.log("Title: " + movie.Title + ", Year: " + movie.Year + "\n IMDB Rating: " + movie.imdbRating + "\nCountry: " + movie.Country +
+          ", Language: " + movie.Language + "\nPlot: " + movie.Plot + "\nActors: " + movie.Actors);
       }
     });
 
-    console.log('Withdrew ' + val + '.');
   },
 
   'do-what-it-says': function () {
@@ -157,10 +161,22 @@ if (!userCommand) {
   return console.log("Liri cannot complete your request. Please try a new command.")
 };
 
-var userInput = process.argv[3];
+var processArg = process.argv;
+var userInputArray = []
 
-if (!userInput) {
+for (i = 3; i <processArg.length; i++){
+ userInputArray.push(processArg[i]);
+};
+var userInputString = userInputArray.join(" ");
+
+/*
+if (userInput === undefined) {
   userCommand();
+  console.log('bananas in pajamas!');
 } else {
   userCommand(userInput);
+  console.log("you were not able to call the if statement.")
 };
+*/
+console.log('user input string: ' + userInputString);
+userCommand(userInputString);
